@@ -2,11 +2,11 @@
 // @name        JobNimbus RoofR Integration
 // @match       *://webappui.jobnimbus.com/*
 // @grant       GM_xmlhttpRequest
-// @version     1.0.0 build 2501221143
+// @version     1.0.0 build 2505231028
 // @author      Insurance Solutions Services Inc.
 // @description Adds a button to JobNimbus contact's financials tab to upload a RoofR report and sync measurements tokens automatically.
-// @downloadURL https://raw.githubusercontent.com/syntask/userscripts/main/Scripts/jobnimbus-upload-roofr-button.user.js
-// @updateURL   https://raw.githubusercontent.com/syntask/userscripts/main/Scripts/jobnimbus-upload-roofr-button.user.js
+// @downloadURL https://raw.githubusercontent.com/issroofing/userscripts/main/jobnimbus-roofr-integration.user.js
+// @updateURL   https://raw.githubusercontent.com/issroofing/userscripts/main/jobnimbus-roofr-integration.user.js
 // ==/UserScript==
 
 // Build 202501221129
