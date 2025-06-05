@@ -2,14 +2,20 @@
 // @name        JobNimbus RoofR Integration
 // @match       *://webappui.jobnimbus.com/*
 // @grant       GM_xmlhttpRequest
-// @version     1.0.0 build 2505231028
+// @version     1.0.0 build 202506050116
 // @author      Insurance Solutions Services Inc.
 // @description Adds a button to JobNimbus contact's financials tab to upload a RoofR report and sync measurements tokens automatically.
 // @downloadURL https://raw.githubusercontent.com/issroofing/userscripts/main/jobnimbus-roofr-integration.user.js
 // @updateURL   https://raw.githubusercontent.com/issroofing/userscripts/main/jobnimbus-roofr-integration.user.js
 // ==/UserScript==
 
-// Build 202501221129
+// Build 202506050116 - June 5th, 2025 1:19 AM
+// Changelog:
+// 1. Fixes a bug where the user could not click the checkbox to select/unselect a structure from the list of those identified in the RoofR PDF, forcing the user to instead click the structure thumbnail instead. Users can now click the checkbox itself if they desire.  
+// 2. All structures are now unselected by default. The user must click to select the structure(s) they want before continuing. 
+// 3. Adds a blue border around selected structures to further clarify which structures are selected. 
+// 4. Adds a close button (X) in the top left corner of the Upload RoofR window (users can still click anywhere outside the window to close it). 
+
 function getCookieValue(name) {
     let matches = document.cookie.match(new RegExp(
         "(?:^|; )" + name.replace(/([.$?*|{}()\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
@@ -70,7 +76,7 @@ async function countStructures(previewContainer) {
             },
             onload: function (response) {
                 console.log('Success:', response.responseText);
-                enableSubmitButton();
+                updateSubmitButton();
                 // Clear the preview container
                 previewContainer.innerHTML = '';
                 // get the value of the "structures" key from the response
@@ -89,7 +95,7 @@ async function countStructures(previewContainer) {
     <span>Structure #${summaryIndex}</span>
     <img src="data:image/png;base64,${previewBase64}" alt="Structure ${summaryIndex} on page ${pageNumber}">
     <span>Page ${pageNumber}</span>
-    <input type="checkbox" name="include" checked data-summary-index="${summaryIndex}">
+    <input type="checkbox" name="include" unchecked data-summary-index="${summaryIndex}">
 </div>
                     `;
 
@@ -108,15 +114,23 @@ async function countStructures(previewContainer) {
                         } else {
                             include = include.filter((item) => item !== summaryIndex);
                         }
+                        updateSubmitButton();
                         console.log(include);
                     });
+                    
 
                     // Clicking anywhere on the preview will toggle the checkbox
                     const preview = checkbox.parentElement;
-                    preview.addEventListener('click', function () {
+                    preview.addEventListener('click', function (e) {
+                        // If the user clicked exactly on the <input> itself, do nothing here
+                        if (e.target === checkbox) return;
+
+                        // Otherwise, toggle the checkbox manually
                         checkbox.checked = !checkbox.checked;
                         checkbox.dispatchEvent(new Event('change'));
                     });
+
+                    
 
                 });
 
@@ -216,9 +230,14 @@ function closeModal() {
     }, 3000);
 }
 
-function enableSubmitButton() {
+function updateSubmitButton() {
     const submitButton = document.querySelector('.submitButton');
-    submitButton.classList.remove('disabled');
+    if (include.length > 0){
+        submitButton.classList.remove('disabled');
+    } else {
+        submitButton.classList.add('disabled');
+    }
+    
 }
 
 
@@ -322,6 +341,7 @@ const observer = new MutationObserver(() => {
                                     display: flex;
                                     flex-direction: column;
                                     align-items: center;
+                                    position: relative;
                                 }
 
                                 .uploadLabel{
@@ -332,6 +352,8 @@ const observer = new MutationObserver(() => {
 
                                 .fileInput{
                                     margin-bottom: 20px;
+                                    margin-top: 0px !important;
+                                    height: 16px !important;
                                 }
 
                                 .submitButton{
@@ -374,6 +396,19 @@ const observer = new MutationObserver(() => {
                                     flex-direction: column;
                                     align-items: center;
                                     margin: 16px;
+                                    background-color: rgb(230,230,236);
+                                    padding: 12px 8px;
+                                    border-radius: 6px;
+                                    cursor: pointer;
+                                    user-select: none;
+                                }
+                                
+                                input[type="checkbox"]{
+                                    cursor: pointer;
+                                }
+                                
+                                .preview:has(input[type="checkbox"]:checked) {
+                                    box-shadow: 0 0 0 2px rgb(14, 129, 236) inset;
                                 }
 
                                 .previewContainer{
@@ -387,10 +422,24 @@ const observer = new MutationObserver(() => {
                                     border-radius: 8px;
                                     margin-bottom: 20px;
                                 }
+                                
+                                #uploadFormCloseButton{
+                                    position: absolute;
+                                    left: 6px;
+                                    top: 6px;
+                                    cursor: pointer;
+                                }
 
                             </style>
 
                             <form class="uploadForm">
+                                <div id="uploadFormCloseButton">
+                                    <svg width="18" height="18" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                                        <circle cx="8" cy="8" r="6" fill="rgb(252,70,69)"/>
+                                        <line x1="6" y1="6" x2="10" y2="10" stroke="rgb(137,0,4)" stroke-width="1.5" stroke-linecap="round"/>
+                                        <line x1="10" y1="6" x2="6" y2="10" stroke="rgb(137,0,4)" stroke-width="1.5" stroke-linecap="round"/>
+                                    </svg>
+                                </div>
                                 <label class="uploadLabel">Upload RoofR Report</label>
                                 <input class="fileInput" type="file" accept=".pdf">
                                 <div class="previewContainer"></div>
@@ -403,6 +452,12 @@ const observer = new MutationObserver(() => {
                             if (e.target === modal) {
                                 modal.remove();
                             }
+                        });
+                        
+                        // Clicking the close button will close the modal
+                        const closeButton = modal.querySelector('#uploadFormCloseButton');
+                        closeButton.addEventListener('click', function(e) {
+                            modal.remove();
                         });
 
                         const previewContainer = modal.querySelector('.previewContainer');
