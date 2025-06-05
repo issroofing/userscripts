@@ -2,14 +2,14 @@
 // @name        JobNimbus RoofR Integration
 // @match       *://webappui.jobnimbus.com/*
 // @grant       GM_xmlhttpRequest
-// @version     1.0.1
+// @version     1.0.1 build 202506050116
 // @author      Insurance Solutions Services Inc.
 // @description Adds a button to JobNimbus contact's financials tab to upload a RoofR report and sync measurements tokens automatically.
 // @downloadURL https://raw.githubusercontent.com/issroofing/userscripts/main/jobnimbus-roofr-integration.user.js
 // @updateURL   https://raw.githubusercontent.com/issroofing/userscripts/main/jobnimbus-roofr-integration.user.js
 // ==/UserScript==
 
-// Version 1.0.1 - Released June 5th, 2025 1:26 AM
+// Version 1.0.1 build 202506050116 - Released June 5th, 2025 1:26 AM
 // Changelog:
 // 1. Fixes a bug where the user could not click the checkbox to select/unselect a structure from the list of those identified in the RoofR PDF, forcing the user to instead click the structure thumbnail instead. Users can now click the checkbox itself if they desire.  
 // 2. All structures are now unselected by default. The user must click to select the structure(s) they want before continuing. 
